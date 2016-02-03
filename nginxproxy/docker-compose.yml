@@ -9,6 +9,7 @@ sharedvolume:
   container_name: sharedvolume-$namespace
   volumes: 
     - "/var/opt/jfrog/cluster"
+    - "/var/lib/mysql"
 
 artifactorysc_1:
   build: artifactory
@@ -56,6 +57,5 @@ mysqlsc:
     - MYSQL_DATABASE=artdb
     - MYSQL_USER=artifactory
     - MYSQL_PASSWORD=password
-    - datadir=/srv
-  volumes:
-    - "/var/lib/mysql"
+  volumes_from:
+    - sharedvolume

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ha_home=/srv/artifactory
+ha_home=/var/opt/jfrog/cluster
 
 node=$(echo $MYSQL_NAME |sed 's~^[^_]*_\([0-9]\).*~\1~')
 
