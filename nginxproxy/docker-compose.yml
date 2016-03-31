@@ -18,7 +18,7 @@ artifactorysc_1:
     - mysqlsc:mysql
   privileged: true
   volumes:
-    - "${HOME}/license/artifactory-H1.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
+    - "$art_licenses/artifactory-H1.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
     - "/etc/opt/jfrog/artifactory"
     - "/var/opt/jfrog/artifactory/data"
 
@@ -32,7 +32,7 @@ artifactorysc_2:
     - mysqlsc:mysql
   privileged: true
   volumes:
-    - "${HOME}/license/artifactory-H2.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
+    - "$art_licenses/artifactory-H2.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
     - "/etc/opt/jfrog/artifactory"
     - "/var/opt/jfrog/artifactory/data"
   volumes_from: 

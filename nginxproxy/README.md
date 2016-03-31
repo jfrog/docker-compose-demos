@@ -20,7 +20,11 @@ For the first time, create a boot2docker VM with the following command line :
     docker ps
 
 ### 2. Setup licenses
-Put your HA licenses in $HOME/license/artifactory-H1.lic and $HOME/license/artifactory-H2.lic
+You should set the env variable $art_licenses to the path on the docker host where are located the licenses :
+    
+    export art_licenses=/home/myuser/mylicenses
+
+Put your HA licenses in `$art_licenses/artifactory-H1.lic` and `$art_licenses/license/artifactory-H2.lic`
 
 ### 3. Aliasing the ip machine
 
