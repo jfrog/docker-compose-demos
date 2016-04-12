@@ -13,6 +13,7 @@ RUN mkdir -p ~artifactory/etcback
 RUN cp ~artifactory/etc/* ~artifactory/etcback
 
 COPY server.xml /opt/jfrog/artifactory/tomcat/conf/server.xml
+COPY nginx.ftl /var/opt/jfrog/artifactory/etc/nginx.ftl
 
 EXPOSE 8081 10042
 
