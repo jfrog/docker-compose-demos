@@ -1,61 +1,59 @@
-# IMPORTANT: the environment variable below is based on the environment of the running docker-compose
-# In other words if you use the docker-compose container rather than running it as yourself it won't work.
-# 
-# $HOME : home directory (already set by the system hopefuly)
-# $namespace : some namespace you should have set with `export namespace=mydemo`
+# Version 2 without namespacing. Required env variables :
+# ART_PRIMARY_LICENSE
+# ART_LICENSES
 #
-sharedvolume:
-  image: busybox
-  container_name: sharedvolume-$namespace
-  volumes: 
-    - "/var/opt/jfrog/cluster"
-    - "/var/lib/mysql"
+version: '2'
+services:
+  artifactory_1:
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.5
+    volumes:
+      - "/etc/opt/jfrog/artifactory"
+      - "/var/opt/jfrog/artifactory/data"
+      - clusterhome:/var/opt/jfrog/cluster
+    environment:
+      - DATABASE_CONNECTION_STRING=jdbc:mysql://mysqldb:3306/artdb?characterEncoding=UTF-8&elideSetAutoCommits=true
+      - DATABASE_USER=artifactory
+      - DATABASE_PASSWORD=password
+      - ART_PRIMARY_LICENSE
+      - ART_LICENSES
+    depends_on:
+      - mysqldb
 
-artifactorysc_1:
-  build: artifactory
-  container_name: artifactorysc_1-$namespace
-  links:
-    - mysqlsc:mysql
-  privileged: true
-  volumes:
-    - "$art_licenses/artifactory-H1.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
-    - "/etc/opt/jfrog/artifactory"
-    - "/var/opt/jfrog/artifactory/data"
+  artifactory_2:
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.5
+    volumes:
+      - "/etc/opt/jfrog/artifactory"
+      - "/var/opt/jfrog/artifactory/data"
+      - clusterhome:/var/opt/jfrog/cluster
+    environment:
+      - PRIMARY_BASE_URL=http://artifactory_1:8081/artifactory
+    depends_on:
+      - artifactory_1
+      - mysqldb
 
-  volumes_from: 
-    - sharedvolume
+  nginx:
+    build: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5000-5010:5000-5010"
 
-artifactorysc_2:
-  build: artifactory
-  container_name: artifactorysc_2-$namespace
-  links:
-    - mysqlsc:mysql
-  privileged: true
-  volumes:
-    - "$art_licenses/artifactory-H2.lic:/etc/opt/jfrog/artifactory/artifactory.lic:ro"
-    - "/etc/opt/jfrog/artifactory"
-    - "/var/opt/jfrog/artifactory/data"
-  volumes_from: 
-    - sharedvolume
+  mysqldb:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=artdb
+      - MYSQL_USER=artifactory
+      - MYSQL_PASSWORD=password
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - "3306"
 
-nginxsc:
-  build: nginx
-  container_name: nginxsc-$namespace
-  ports:
-    - "80:80"
-    - "443:443"
-    - "5000-5010:5000-5010"
-  links:
-    - artifactorysc_1:artifactory_1
-    - artifactorysc_2:artifactory_2
 
-mysqlsc:
-  image: mysql
-  container_name: mysqlsc-$namespace
-  environment:
-    - MYSQL_ROOT_PASSWORD=password
-    - MYSQL_DATABASE=artdb
-    - MYSQL_USER=artifactory
-    - MYSQL_PASSWORD=password
-  volumes_from:
-    - sharedvolume
+volumes:
+  mysqldata:
+    driver: local
+  clusterhome:
+    driver: local
+
