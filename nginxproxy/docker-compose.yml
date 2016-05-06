@@ -1,6 +1,8 @@
 # Version 2 without namespacing. Required env variables :
 # ART_PRIMARY_LICENSE
 # ART_LICENSES
+# ART_LOGIN (optional, default=admin)
+# ART_PASSWORD (optional, default=password)
 #
 version: '2'
 services:
@@ -27,6 +29,8 @@ services:
       - clusterhome:/var/opt/jfrog/cluster
     environment:
       - PRIMARY_BASE_URL=http://artifactory_1:8081/artifactory
+      - ART_LOGIN=admin
+      - ART_PASSWORD=password
     depends_on:
       - artifactory_1
       - mysqldb
@@ -37,6 +41,9 @@ services:
       - "80:80"
       - "443:443"
       - "5000-5010:5000-5010"
+    environment:
+      - ART_LOGIN=admin
+      - ART_PASSWORD=password
 
   mysqldb:
     image: mysql
@@ -49,7 +56,6 @@ services:
       - mysqldata:/var/lib/mysql
     ports:
       - "3306"
-
 
 volumes:
   mysqldata:

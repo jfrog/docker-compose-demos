@@ -2,9 +2,9 @@
 
 # Script to automagically update Nginx reverse proxy configuration
 # Artifactory login
-ART_LOGIN=admin
+: ${ART_LOGIN:=admin}
 # Artifactory password
-ART_PASSWD=password
+: ${ART_PASSWORD:=password}
 # Interval in seconds to check for new configuration on artifactory
 CHECK_INTERVAL=5
 # Artifactory's primary node host:port
@@ -18,7 +18,7 @@ function updateArtConfIfNeeded {
 	echo "Initial conf = $initialConf"
 	if [ "$initialConf" != "NGINX" ]
 	then
-		curl -s -u$ART_LOGIN:$ART_PASSWD -X POST -H 'Content-Type: application/json' http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer -d '
+		curl -s -u$ART_LOGIN:$ART_PASSWORD -X POST -H 'Content-Type: application/json' http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer -d '
 		{
 		  "key" : "nginx",
 		  "webServerType" : "NGINX",
@@ -53,21 +53,21 @@ function updateNginxConfIfNeeded {
 }
 
 function getReverseProxyConfFromPrimaryNode {
-	curl -s -u$ART_LOGIN:$ART_PASSWD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer
+	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer
 }
 
 function getReverseProxySnippetFromPrimaryNode {
-	curl -s -u$ART_LOGIN:$ART_PASSWD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/reverseProxy/nginx
+	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/reverseProxy/nginx
 }
 
 function waitForPrimaryNode {
-	echo "WAITING FOR PRIMARY NODE."
-	until $(curl -u$ART_LOGIN:$ART_PASSWD --output /dev/null --silent --head --fail http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer)
+	echo "[NGINX] WAITING FOR PRIMARY NODE."
+	until $(curl -u$ART_LOGIN:$ART_PASSWORD --output /dev/null --silent --head --fail http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer)
 	do
 		echo "."
-		sleep 1
+		sleep 5
 	done
-	echo "PRIMARY NODE IS UP !"
+	echo "[NGINX] PRIMARY NODE IS UP !"
 }
 
 # Update the reverse proxy config in Artifactory if needed
