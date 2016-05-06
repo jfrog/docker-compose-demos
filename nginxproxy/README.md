@@ -32,8 +32,6 @@ You can set this up from a file with :
 - ART_LOGIN (optional, default=admin)
 - ART_PASSWORD (optional, default=password)
 
-Put your HA licenses in `$art_licenses/artifactory-H1.lic` and `$art_licenses/license/artifactory-H2.lic`
-
 ### 3. Aliasing the ip machine
 
     echo "$(docker-machine ip fusion) artifactory-cluster" | sudo tee -a /etc/hosts
