@@ -7,7 +7,7 @@
 version: '2'
 services:
   artifactory_1:
-    image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.5
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.6
     volumes:
       - "/etc/opt/jfrog/artifactory"
       - "/var/opt/jfrog/artifactory/data"
@@ -22,7 +22,7 @@ services:
       - mysqldb
 
   artifactory_2:
-    image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.5
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.6
     volumes:
       - "/etc/opt/jfrog/artifactory"
       - "/var/opt/jfrog/artifactory/data"
@@ -36,7 +36,7 @@ services:
       - mysqldb
 
   nginx:
-    build: nginx
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhanginx:1.10.0
     ports:
       - "80:80"
       - "443:443"
@@ -44,6 +44,9 @@ services:
     environment:
       - ART_LOGIN=admin
       - ART_PASSWORD=password
+      #- ART_PRIMARY_NODE_HOST_PORT=artifactory_1:8081
+      #- ART_REVERSE_PROXY_METHOD=SUBDOMAIN
+      #- ART_SERVER_NAME=mycluster.local
 
   mysqldb:
     image: mysql

@@ -1,9 +1,9 @@
-FROM nginx
+FROM nginx:1.10.0
 
-COPY artifactory.conf /etc/nginx/conf.d/
+RUN > /etc/nginx/conf.d/artifactory.conf
 
-COPY runNginx.sh /usr/bin/
-COPY updateConf.sh /usr/bin/
+COPY runNginx.sh /usr/local/bin/
+COPY updateConf.sh /usr/local/bin/
 
 # Install curl and jq to do some http requests
 RUN \

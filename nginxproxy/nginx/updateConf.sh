@@ -5,10 +5,14 @@
 : ${ART_LOGIN:=admin}
 # Artifactory password
 : ${ART_PASSWORD:=password}
+# Artifactory's primary node host:port
+: ${ART_PRIMARY_NODE_HOST_PORT:=artifactory_1:8081}
+# Artifactory's external server name
+: ${ART_SERVER_NAME:=artifactory-cluster}
+# Artifactory's port method, default to PORTPERREPO (can be SUBDOMAIN)
+: ${ART_REVERSE_PROXY_METHOD:=PORTPERREPO}
 # Interval in seconds to check for new configuration on artifactory
 CHECK_INTERVAL=5
-# Artifactory's primary node host:port
-PRIMARY_NODE_HOST=artifactory_1:8081
 # Path to nginx conf inside the docker image
 NGINX_CONF=/etc/nginx/conf.d/artifactory.conf
 
@@ -18,13 +22,13 @@ function updateArtConfIfNeeded {
 	echo "Initial conf = $initialConf"
 	if [ "$initialConf" != "NGINX" ]
 	then
-		curl -s -u$ART_LOGIN:$ART_PASSWORD -X POST -H 'Content-Type: application/json' http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer -d '
+		curl -s -u$ART_LOGIN:$ART_PASSWORD -X POST -H 'Content-Type: application/json' http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/webServer -d '
 		{
 		  "key" : "nginx",
 		  "webServerType" : "NGINX",
 		  "artifactoryAppContext" : "artifactory",
 		  "publicAppContext" : "artifactory",
-		  "serverName" : "artifactory-cluster",
+		  "serverName" : "'$ART_SERVER_NAME'",
 		  "artifactoryServerName" : "localhost",
 		  "artifactoryPort" : 8081,
 		  "sslCertificate" : "/etc/pki/tls/certs/example.pem",
@@ -53,16 +57,17 @@ function updateNginxConfIfNeeded {
 }
 
 function getReverseProxyConfFromPrimaryNode {
-	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer
+	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/webServer
 }
 
 function getReverseProxySnippetFromPrimaryNode {
-	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/reverseProxy/nginx
+	# TODO : try first from the primary and if not available, try from the cluster, if not available don't update the conf !
+	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/reverseProxy/nginx
 }
 
 function waitForPrimaryNode {
 	echo "[NGINX] WAITING FOR PRIMARY NODE."
-	until $(curl -u$ART_LOGIN:$ART_PASSWORD --output /dev/null --silent --head --fail http://$PRIMARY_NODE_HOST/artifactory/api/system/configuration/webServer)
+	until $(curl -u$ART_LOGIN:$ART_PASSWORD --output /dev/null --silent --head --fail http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/webServer)
 	do
 		echo "."
 		sleep 5
