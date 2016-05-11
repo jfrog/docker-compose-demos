@@ -45,24 +45,43 @@ function updateArtConfIfNeeded {
 }
 
 function updateNginxConfIfNeeded {
-	local reverseProxyConf=$(getReverseProxySnippetFromPrimaryNode)
-	local diffWithCurrentConf=$(diff $NGINX_CONF <(echo "$reverseProxyConf"))
-	if [ -n "$diffWithCurrentConf" ]
-	then
-		echo "ART CONFIG CHANGED : $diffWithCurrentConf" 
-		echo "UPDATING NGINX CONF at  $NGINX_CONF"
-		echo "$reverseProxyConf" > "$NGINX_CONF"
-		/etc/init.d/nginx reload
-	fi	
+	local reverseProxyConf=$(getReverseProxySnippet)
+	if [ "$reverseProxyConf" != "ERROR" ] && [ ! -z "$reverseProxyConf" ]; then
+		local diffWithCurrentConf=$(diff $NGINX_CONF <(echo "$reverseProxyConf"))
+		if [ -n "$diffWithCurrentConf" ]
+		then
+			echo "ART CONFIG CHANGED : $diffWithCurrentConf" 
+			echo "UPDATING NGINX CONF at  $NGINX_CONF"
+			local savedConf=$(cat $NGINX_CONF)
+			echo "$reverseProxyConf" > "$NGINX_CONF"
+			/etc/init.d/nginx reload
+			if [ $? -ne 0 ]; then
+				logError "Something went wrong after loading new config, restoring the previous conf"
+				echo "$savedConf" > "$NGINX_CONF"
+			fi
+		fi
+	fi
 }
 
 function getReverseProxyConfFromPrimaryNode {
 	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/webServer
 }
 
-function getReverseProxySnippetFromPrimaryNode {
-	# TODO : try first from the primary and if not available, try from the cluster, if not available don't update the conf !
-	curl -s -u$ART_LOGIN:$ART_PASSWORD http://$ART_PRIMARY_NODE_HOST_PORT/artifactory/api/system/configuration/reverseProxy/nginx
+function getReverseProxySnippet {
+	local result=$(getReverseProxySnippetFrom $ART_PRIMARY_NODE_HOST_PORT)
+	echo "$result"
+}
+
+function getReverseProxySnippetFrom {
+	local host=$1
+	local response=$(curl -u$ART_LOGIN:$ART_PASSWORD -S --fail http://$host/artifactory/api/system/configuration/reverseProxy/nginx)
+	local responseStatus=$?
+	if [ $responseStatus -ne 0 ] || [ -z "$response" ]; then
+		logError "Couldn't retrieve the reverse proxy conf from $host, got response from server $response "
+		echo "ERROR"
+	else
+		echo "$response"
+	fi	
 }
 
 function waitForPrimaryNode {
@@ -73,6 +92,10 @@ function waitForPrimaryNode {
 		sleep 5
 	done
 	echo "[NGINX] PRIMARY NODE IS UP !"
+}
+
+function logError {
+	>&2 echo "$1"
 }
 
 # Update the reverse proxy config in Artifactory if needed
