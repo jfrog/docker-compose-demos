@@ -33,7 +33,7 @@ function updateArtConfIfNeeded {
 		  "artifactoryPort" : 8081,
 		  "sslCertificate" : "/etc/pki/tls/certs/example.pem",
 		  "sslKey" : "/etc/pki/tls/private/example.key",
-		  "dockerReverseProxyMethod" : "PORTPERREPO",
+		  "dockerReverseProxyMethod" : "'$ART_REVERSE_PROXY_METHOD'",
 		  "useHttps" : true,
 		  "useHttp" : true,
 		  "httpsPort" : 443,
