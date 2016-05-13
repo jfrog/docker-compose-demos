@@ -1,5 +1,7 @@
 FROM nginx:1.10.0
 
+RUN printf 'server { \nlisten 9090; \nlocation /health { \naccess_log off; \nreturn 200; \n} \n}' >> /etc/nginx/conf.d/default.conf
+
 RUN > /etc/nginx/conf.d/artifactory.conf
 
 COPY runNginx.sh /usr/local/bin/
