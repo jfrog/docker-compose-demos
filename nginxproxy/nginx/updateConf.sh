@@ -74,10 +74,10 @@ function getReverseProxySnippet {
 
 function getReverseProxySnippetFrom {
 	local host=$1
-	local response=$(curl -u$ART_LOGIN:$ART_PASSWORD -S --fail http://$host/artifactory/api/system/configuration/reverseProxy/nginx)
+	local response=$((curl -u$ART_LOGIN:$ART_PASSWORD --show-error --silent --fail http://$host/artifactory/api/system/configuration/reverseProxy/nginx) 2>&1)
 	local responseStatus=$?
 	if [ $responseStatus -ne 0 ] || [ -z "$response" ]; then
-		logError "Couldn't retrieve the reverse proxy conf from $host, got response from server $response "
+		logError "Couldn't retrieve the reverse proxy conf from $host, response from server $response "
 		echo "ERROR"
 	else
 		echo "$response"
