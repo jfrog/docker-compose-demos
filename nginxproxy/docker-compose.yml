@@ -7,7 +7,7 @@
 version: '2'
 services:
   artifactory_1:
-    image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.6
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.7
     volumes:
       - "/etc/opt/jfrog/artifactory"
       - "/var/opt/jfrog/artifactory/data"
@@ -22,7 +22,7 @@ services:
       - mysqldb
 
   artifactory_2:
-    image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.6
+    image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.7
     volumes:
       - "/etc/opt/jfrog/artifactory"
       - "/var/opt/jfrog/artifactory/data"
