@@ -9,8 +9,6 @@ services:
   artifactory_1:
     image: alexistjfrog-docker-registry.bintray.io/artifactoryhaprimary:4.7.7
     volumes:
-      - "/etc/opt/jfrog/artifactory"
-      - "/var/opt/jfrog/artifactory/data"
       - clusterhome:/var/opt/jfrog/cluster
     environment:
       - DATABASE_CONNECTION_STRING=jdbc:mysql://mysqldb:3306/artdb?characterEncoding=UTF-8&elideSetAutoCommits=true
@@ -24,8 +22,6 @@ services:
   artifactory_2:
     image: alexistjfrog-docker-registry.bintray.io/artifactoryhasecondary:4.7.7
     volumes:
-      - "/etc/opt/jfrog/artifactory"
-      - "/var/opt/jfrog/artifactory/data"
       - clusterhome:/var/opt/jfrog/cluster
     environment:
       - PRIMARY_BASE_URL=http://artifactory_1:8081/artifactory
