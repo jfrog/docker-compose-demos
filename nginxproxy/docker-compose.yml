@@ -40,7 +40,7 @@ services:
     environment:
       - ART_LOGIN=admin
       - ART_PASSWORD=password
-      #- ART_PRIMARY_NODE_HOST_PORT=artifactory_1:8081
+      - ART_PRIMARY_BASE_URL=http://artifactory_1:8081/artifactory
       #- ART_REVERSE_PROXY_METHOD=SUBDOMAIN
       #- ART_SERVER_NAME=mycluster.local
 
